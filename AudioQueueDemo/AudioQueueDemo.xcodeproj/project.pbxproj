@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		475069591D324AD10066C015 /* AuidoPlayer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 475069581D324AD10066C015 /* AuidoPlayer.swift */; };
 		47B247EA1D3145C9008552E4 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 47B247E91D3145C9008552E4 /* AppDelegate.swift */; };
 		47B247EC1D3145C9008552E4 /* ViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 47B247EB1D3145C9008552E4 /* ViewController.swift */; };
 		47B247EF1D3145C9008552E4 /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 47B247ED1D3145C9008552E4 /* Main.storyboard */; };
@@ -15,6 +16,7 @@
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
+		475069581D324AD10066C015 /* AuidoPlayer.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = AuidoPlayer.swift; sourceTree = "<group>"; };
 		47B247E61D3145C9008552E4 /* AudioQueueDemo.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = AudioQueueDemo.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		47B247E91D3145C9008552E4 /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
 		47B247EB1D3145C9008552E4 /* ViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ViewController.swift; sourceTree = "<group>"; };
@@ -54,6 +56,7 @@
 		47B247E81D3145C9008552E4 /* AudioQueueDemo */ = {
 			isa = PBXGroup;
 			children = (
+				475069581D324AD10066C015 /* AuidoPlayer.swift */,
 				47B247E91D3145C9008552E4 /* AppDelegate.swift */,
 				47B247EB1D3145C9008552E4 /* ViewController.swift */,
 				47B247ED1D3145C9008552E4 /* Main.storyboard */,
@@ -135,6 +138,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				475069591D324AD10066C015 /* AuidoPlayer.swift in Sources */,
 				47B247EC1D3145C9008552E4 /* ViewController.swift in Sources */,
 				47B247EA1D3145C9008552E4 /* AppDelegate.swift in Sources */,
 			);
@@ -288,6 +292,7 @@
 				47B247FA1D3145C9008552E4 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
 	};
