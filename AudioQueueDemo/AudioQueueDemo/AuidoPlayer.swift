@@ -149,16 +149,19 @@ func AudioFileStreamPropertyListener(clientData: UnsafeMutablePointer<Void>, aud
         }
     }
 }
+
 func AudioFileStreamPacketsCallback(clientData: UnsafeMutablePointer<Void>, numberBytes: UInt32, numberPackets: UInt32, ioData: UnsafePointer<Void>, packetDescription: UnsafeMutablePointer<AudioStreamPacketDescription>) {
     
     let this = Unmanaged<AudioPlayer>.fromOpaque(COpaquePointer(clientData)).takeUnretainedValue()
     this.storePackets(numberPackets, numberOfBytes: numberBytes, data: ioData, packetDescription: packetDescription)
 }
+
 func AudioQueueOutputCallback(clientData: UnsafeMutablePointer<Void>, AQ: AudioQueueRef, buffer: AudioQueueBufferRef) {
     let this = Unmanaged<AudioPlayer>.fromOpaque(COpaquePointer(clientData)).takeUnretainedValue()
     AudioQueueFreeBuffer(AQ, buffer)
     this.enqueueDataWithPacketsCount(Int(this.framePerSecond * 5))
 }
+
 func AudioQueueRunningListener(clientData: UnsafeMutablePointer<Void>, AQ: AudioQueueRef, propertyID: AudioQueuePropertyID) {
     let this = Unmanaged<AudioPlayer>.fromOpaque(COpaquePointer(clientData)).takeUnretainedValue()
     var status: OSStatus = 0

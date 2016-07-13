@@ -7,15 +7,20 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		474580D61D34C1C2006FCCA8 /* AudioQueueSample.swift in Sources */ = {isa = PBXBuildFile; fileRef = 474580D51D34C1C2006FCCA8 /* AudioQueueSample.swift */; };
+		474580D81D3519D6006FCCA8 /* AudioQueueFileSample.swift in Sources */ = {isa = PBXBuildFile; fileRef = 474580D71D3519D6006FCCA8 /* AudioQueueFileSample.swift */; };
 		475069591D324AD10066C015 /* AuidoPlayer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 475069581D324AD10066C015 /* AuidoPlayer.swift */; };
 		47B247EA1D3145C9008552E4 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 47B247E91D3145C9008552E4 /* AppDelegate.swift */; };
 		47B247EC1D3145C9008552E4 /* ViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 47B247EB1D3145C9008552E4 /* ViewController.swift */; };
 		47B247EF1D3145C9008552E4 /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 47B247ED1D3145C9008552E4 /* Main.storyboard */; };
 		47B247F11D3145C9008552E4 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 47B247F01D3145C9008552E4 /* Assets.xcassets */; };
 		47B247F41D3145C9008552E4 /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 47B247F21D3145C9008552E4 /* LaunchScreen.storyboard */; };
+		47F763B91D362854009A959F /* audiotest.mp3 in Resources */ = {isa = PBXBuildFile; fileRef = 47F763B81D362854009A959F /* audiotest.mp3 */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
+		474580D51D34C1C2006FCCA8 /* AudioQueueSample.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = AudioQueueSample.swift; sourceTree = "<group>"; };
+		474580D71D3519D6006FCCA8 /* AudioQueueFileSample.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = AudioQueueFileSample.swift; sourceTree = "<group>"; };
 		475069581D324AD10066C015 /* AuidoPlayer.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = AuidoPlayer.swift; sourceTree = "<group>"; };
 		47B247E61D3145C9008552E4 /* AudioQueueDemo.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = AudioQueueDemo.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		47B247E91D3145C9008552E4 /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
@@ -24,6 +29,7 @@
 		47B247F01D3145C9008552E4 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		47B247F31D3145C9008552E4 /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/LaunchScreen.storyboard; sourceTree = "<group>"; };
 		47B247F51D3145C9008552E4 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		47F763B81D362854009A959F /* audiotest.mp3 */ = {isa = PBXFileReference; lastKnownFileType = audio.mp3; path = audiotest.mp3; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -56,9 +62,12 @@
 		47B247E81D3145C9008552E4 /* AudioQueueDemo */ = {
 			isa = PBXGroup;
 			children = (
+				474580D51D34C1C2006FCCA8 /* AudioQueueSample.swift */,
+				474580D71D3519D6006FCCA8 /* AudioQueueFileSample.swift */,
 				475069581D324AD10066C015 /* AuidoPlayer.swift */,
 				47B247E91D3145C9008552E4 /* AppDelegate.swift */,
 				47B247EB1D3145C9008552E4 /* ViewController.swift */,
+				47F763B81D362854009A959F /* audiotest.mp3 */,
 				47B247ED1D3145C9008552E4 /* Main.storyboard */,
 				47B247F01D3145C9008552E4 /* Assets.xcassets */,
 				47B247F21D3145C9008552E4 /* LaunchScreen.storyboard */,
@@ -126,6 +135,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				47B247F41D3145C9008552E4 /* LaunchScreen.storyboard in Resources */,
+				47F763B91D362854009A959F /* audiotest.mp3 in Resources */,
 				47B247F11D3145C9008552E4 /* Assets.xcassets in Resources */,
 				47B247EF1D3145C9008552E4 /* Main.storyboard in Resources */,
 			);
@@ -140,6 +150,8 @@
 			files = (
 				475069591D324AD10066C015 /* AuidoPlayer.swift in Sources */,
 				47B247EC1D3145C9008552E4 /* ViewController.swift in Sources */,
+				474580D61D34C1C2006FCCA8 /* AudioQueueSample.swift in Sources */,
+				474580D81D3519D6006FCCA8 /* AudioQueueFileSample.swift in Sources */,
 				47B247EA1D3145C9008552E4 /* AppDelegate.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;

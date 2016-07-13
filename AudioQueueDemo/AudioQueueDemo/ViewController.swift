@@ -10,17 +10,21 @@ import UIKit
 
 class ViewController: UIViewController {
     
-    var player: AudioPlayer?
+    var player: AudioQueueFileSample?
 
     override func viewDidLoad() {
         super.viewDidLoad()
         // Do any additional setup after loading the view, typically from a nib.
         
-        player = AudioPlayer(URL: NSURL(string: "https://archive.org/download/testmp3testfile/mpthreetest.mp3")!)
+//        player = AudioPlayer(URL: NSURL(string: "https://archive.org/download/testmp3testfile/mpthreetest.mp3")!)
+        
+        player = AudioQueueFileSample()
     }
 
     @IBAction func buttonClicked(sender: AnyObject) {
+//        let player = AudioQueueFileSample()
         if let player = self.player {
+            player.openAudioFile(NSBundle.mainBundle().URLForResource("audiotest", withExtension: "mp3")!)
             player.play()
         }
     }
