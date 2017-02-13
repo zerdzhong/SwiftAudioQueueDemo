@@ -10,42 +10,42 @@ import Foundation
 import AudioToolbox
 
 class AudioPlayer: NSObject {
-    var fileURL: NSURL
+    var fileURL: URL
 
-    var URLSession: NSURLSession!
-    var audioFileStreamID: AudioFileStreamID = nil
-    var audioQueue: AudioQueueRef = nil
+    var URLSession: Foundation.URLSession!
+    var audioFileStreamID: AudioFileStreamID? = nil
+    var audioQueue: AudioQueueRef? = nil
     var streamDescription: AudioStreamBasicDescription?
 
-    var packets = [NSData]()
+    var packets = [Data]()
     
     var readHead: Int = 0
     var loaded = false
     var stopped = false
     
-    init(URL: NSURL) {
+    init(URL: Foundation.URL) {
         self.fileURL = URL
         super.init()
         
-        let selfPointer = unsafeBitCast(self, UnsafeMutablePointer<Void>.self)
+        let selfPointer = unsafeBitCast(self, to: UnsafeMutableRawPointer.self)
         AudioFileStreamOpen(selfPointer, AudioFileStreamPropertyListener, AudioFileStreamPacketsCallback, kAudioFileMP3Type, &self.audioFileStreamID)
         
-        let configuration = NSURLSessionConfiguration.defaultSessionConfiguration()
-        self.URLSession = NSURLSession(configuration: configuration, delegate: self, delegateQueue: nil)
-        let task = self.URLSession.dataTaskWithURL(URL)
+        let configuration = URLSessionConfiguration.default
+        self.URLSession = Foundation.URLSession(configuration: configuration, delegate: self, delegateQueue: nil)
+        let task = self.URLSession.dataTask(with: URL)
         task.resume()
     }
     
     deinit {
         if self.audioQueue != nil {
-            AudioQueueReset(audioQueue)
+            AudioQueueReset(audioQueue!)
         }
-        AudioFileStreamClose(audioFileStreamID)
+        AudioFileStreamClose(audioFileStreamID!)
     }
     
     var framePerSecond: Double {
         get {
-            if let streamDescription = self.streamDescription where streamDescription.mFramesPerPacket > 0 {
+            if let streamDescription = self.streamDescription, streamDescription.mFramesPerPacket > 0 {
                 return Double(streamDescription.mSampleRate) / Double(streamDescription.mFramesPerPacket)
             }
             return 44100.0 / 1152.0
@@ -57,45 +57,45 @@ class AudioPlayer: NSObject {
             return
         }
         
-        AudioQueueStart(audioQueue, nil)
+        AudioQueueStart(audioQueue!, nil)
     }
     func pause() {
         if self.audioQueue == nil {
         }
         
-        AudioQueuePause(audioQueue)
+        AudioQueuePause(audioQueue!)
     }
     
-    private func parseData(data: NSData) {
-        AudioFileStreamParseBytes(self.audioFileStreamID, UInt32(data.length), data.bytes, AudioFileStreamParseFlags(rawValue: 0))
+    fileprivate func parseData(_ data: Data) {
+        AudioFileStreamParseBytes(self.audioFileStreamID!, UInt32(data.count), (data as NSData).bytes, AudioFileStreamParseFlags(rawValue: 0))
     }
     
     
-    private func createAudioQueue(audioStreamDescription: AudioStreamBasicDescription) {
+    fileprivate func createAudioQueue(_ audioStreamDescription: AudioStreamBasicDescription) {
         var audioStreamDescription = audioStreamDescription
         self.streamDescription = audioStreamDescription
         var status: OSStatus = 0
-        let selfPointer = unsafeBitCast(self, UnsafeMutablePointer<Void>.self)
-        status = AudioQueueNewOutput(&audioStreamDescription, AudioQueueOutputCallback, selfPointer, CFRunLoopGetCurrent(), kCFRunLoopCommonModes, 0, &self.audioQueue)
+        let selfPointer = unsafeBitCast(self, to: UnsafeMutableRawPointer.self)
+        status = AudioQueueNewOutput(&audioStreamDescription, AudioQueueOutputCallback as! AudioQueueOutputCallback, selfPointer, CFRunLoopGetCurrent(), CFRunLoopMode.commonModes.rawValue, 0, &self.audioQueue)
         assert(noErr == status)
-        status = AudioQueueAddPropertyListener(self.audioQueue, kAudioQueueProperty_IsRunning, AudioQueueRunningListener, selfPointer)
+        status = AudioQueueAddPropertyListener(self.audioQueue!, kAudioQueueProperty_IsRunning, AudioQueueRunningListener as! AudioQueuePropertyListenerProc, selfPointer)
         assert(noErr == status)
-        AudioQueuePrime(self.audioQueue, 0, nil)
-        AudioQueueStart(self.audioQueue, nil)
+        AudioQueuePrime(self.audioQueue!, 0, nil)
+        AudioQueueStart(self.audioQueue!, nil)
     }
-    private func storePackets(numberOfPackets: UInt32, numberOfBytes: UInt32, data: UnsafePointer<Void>, packetDescription: UnsafeMutablePointer<AudioStreamPacketDescription>) {
+    fileprivate func storePackets(_ numberOfPackets: UInt32, numberOfBytes: UInt32, data: UnsafeRawPointer, packetDescription: UnsafeMutablePointer<AudioStreamPacketDescription>) {
         for i in 0 ..< Int(numberOfPackets) {
             let packetStart = packetDescription[i].mStartOffset
             let packetSize = packetDescription[i].mDataByteSize
-            let packetData = NSData(bytes: data.advancedBy(Int(packetStart)), length: Int(packetSize))
+            let packetData = Data(bytes: data.advanced(by: Int(packetStart)), count: Int(packetSize))
             self.packets.append(packetData)
         }
         if readHead == 0 && Double(packets.count) > self.framePerSecond * 3 {
-            AudioQueueStart(self.audioQueue, nil)
+            AudioQueueStart(self.audioQueue!, nil)
             self.enqueueDataWithPacketsCount(Int(self.framePerSecond * 3))
         }
     }
-    private func enqueueDataWithPacketsCount(packetCount: Int) {
+    fileprivate func enqueueDataWithPacketsCount(_ packetCount: Int) {
         if self.audioQueue == nil {
             return
         }
@@ -103,38 +103,38 @@ class AudioPlayer: NSObject {
         if readHead + packetCount > packets.count {
             packetCount = packets.count - readHead
         }
-        let totalSize = packets[readHead ..< readHead + packetCount].reduce(0, combine: { $0 + $1.length })
+        let totalSize = packets[readHead ..< readHead + packetCount].reduce(0, { $0 + $1.count })
         var status: OSStatus = 0
-        var buffer: AudioQueueBufferRef = nil
-        status = AudioQueueAllocateBuffer(audioQueue, UInt32(totalSize), &buffer)
+        var buffer: AudioQueueBufferRef? = nil
+        status = AudioQueueAllocateBuffer(audioQueue!, UInt32(totalSize), &buffer)
         assert(noErr == status)
-        buffer.memory.mAudioDataByteSize = UInt32(totalSize)
-        let selfPointer = unsafeBitCast(self, UnsafeMutablePointer<Void>.self)
-        buffer.memory.mUserData = selfPointer
+        buffer?.pointee.mAudioDataByteSize = UInt32(totalSize)
+        let selfPointer = unsafeBitCast(self, to: UnsafeMutableRawPointer.self)
+        buffer?.pointee.mUserData = selfPointer
         var copiedSize = 0
         var packetDescs = [AudioStreamPacketDescription]()
         for i in 0 ..< packetCount {
             let readIndex = readHead + i
             let packetData = packets[readIndex]
-            memcpy(buffer.memory.mAudioData.advancedBy(copiedSize), packetData.bytes, packetData.length)
-            let description = AudioStreamPacketDescription(mStartOffset: Int64(copiedSize), mVariableFramesInPacket: 0, mDataByteSize: UInt32(packetData.length))
+            memcpy(buffer?.pointee.mAudioData.advanced(by: copiedSize), (packetData as NSData).bytes, packetData.count)
+            let description = AudioStreamPacketDescription(mStartOffset: Int64(copiedSize), mVariableFramesInPacket: 0, mDataByteSize: UInt32(packetData.count))
             packetDescs.append(description)
-            copiedSize += packetData.length
+            copiedSize += packetData.count
         }
-        status = AudioQueueEnqueueBuffer(audioQueue, buffer, UInt32(packetCount), packetDescs);
+        status = AudioQueueEnqueueBuffer(audioQueue!, buffer!, UInt32(packetCount), packetDescs);
         readHead += packetCount
     }
     
 }
 
-extension AudioPlayer: NSURLSessionDelegate {
-    func URLSession(session: NSURLSession, dataTask: NSURLSessionDataTask, didReceiveData data: NSData) {
+extension AudioPlayer: URLSessionDelegate {
+    func URLSession(_ session: Foundation.URLSession, dataTask: URLSessionDataTask, didReceiveData data: Data) {
         self.parseData(data)
     }
 }
 
-func AudioFileStreamPropertyListener(clientData: UnsafeMutablePointer<Void>, audioFileStream: AudioFileStreamID, propertyID: AudioFileStreamPropertyID, ioFlag: UnsafeMutablePointer<AudioFileStreamPropertyFlags>) {
-    let this = Unmanaged<AudioPlayer>.fromOpaque(COpaquePointer(clientData)).takeUnretainedValue()
+func AudioFileStreamPropertyListener(_ clientData: UnsafeMutableRawPointer, audioFileStream: AudioFileStreamID, propertyID: AudioFileStreamPropertyID, ioFlag: UnsafeMutablePointer<AudioFileStreamPropertyFlags>) {
+    let this = Unmanaged<AudioPlayer>.fromOpaque(clientData).takeUnretainedValue()
     if propertyID == kAudioFileStreamProperty_DataFormat {
         var status: OSStatus = 0
         var dataSize: UInt32 = 0
@@ -144,26 +144,26 @@ func AudioFileStreamPropertyListener(clientData: UnsafeMutablePointer<Void>, aud
         var audioStreamDescription: AudioStreamBasicDescription = AudioStreamBasicDescription()
         status = AudioFileStreamGetProperty(audioFileStream, kAudioFileStreamProperty_DataFormat, &dataSize, &audioStreamDescription)
         assert(noErr == status)
-        dispatch_async(dispatch_get_main_queue()) {
+        DispatchQueue.main.async {
             this.createAudioQueue(audioStreamDescription)
         }
     }
 }
 
-func AudioFileStreamPacketsCallback(clientData: UnsafeMutablePointer<Void>, numberBytes: UInt32, numberPackets: UInt32, ioData: UnsafePointer<Void>, packetDescription: UnsafeMutablePointer<AudioStreamPacketDescription>) {
+func AudioFileStreamPacketsCallback(_ clientData: UnsafeMutableRawPointer, numberBytes: UInt32, numberPackets: UInt32, ioData: UnsafeRawPointer, packetDescription: UnsafeMutablePointer<AudioStreamPacketDescription>) {
     
-    let this = Unmanaged<AudioPlayer>.fromOpaque(COpaquePointer(clientData)).takeUnretainedValue()
+    let this = Unmanaged<AudioPlayer>.fromOpaque(clientData).takeUnretainedValue()
     this.storePackets(numberPackets, numberOfBytes: numberBytes, data: ioData, packetDescription: packetDescription)
 }
 
-func AudioQueueOutputCallback(clientData: UnsafeMutablePointer<Void>, AQ: AudioQueueRef, buffer: AudioQueueBufferRef) {
-    let this = Unmanaged<AudioPlayer>.fromOpaque(COpaquePointer(clientData)).takeUnretainedValue()
+func AudioQueueOutputCallback(_ clientData: UnsafeMutableRawPointer, AQ: AudioQueueRef, buffer: AudioQueueBufferRef) {
+    let this = Unmanaged<AudioPlayer>.fromOpaque(clientData).takeUnretainedValue()
     AudioQueueFreeBuffer(AQ, buffer)
     this.enqueueDataWithPacketsCount(Int(this.framePerSecond * 5))
 }
 
-func AudioQueueRunningListener(clientData: UnsafeMutablePointer<Void>, AQ: AudioQueueRef, propertyID: AudioQueuePropertyID) {
-    let this = Unmanaged<AudioPlayer>.fromOpaque(COpaquePointer(clientData)).takeUnretainedValue()
+func AudioQueueRunningListener(_ clientData: UnsafeMutableRawPointer, AQ: AudioQueueRef, propertyID: AudioQueuePropertyID) {
+    let this = Unmanaged<AudioPlayer>.fromOpaque(clientData).takeUnretainedValue()
     var status: OSStatus = 0
     var dataSize: UInt32 = 0
     status = AudioQueueGetPropertySize(AQ, propertyID, &dataSize);

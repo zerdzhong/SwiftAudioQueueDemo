@@ -21,10 +21,10 @@ class ViewController: UIViewController {
         player = AudioQueueFileSample()
     }
 
-    @IBAction func buttonClicked(sender: AnyObject) {
+    @IBAction func buttonClicked(_ sender: AnyObject) {
 //        let player = AudioQueueFileSample()
         if let player = self.player {
-            player.openAudioFile(NSBundle.mainBundle().URLForResource("audiotest", withExtension: "mp3")!)
+            player.openAudioFile(Bundle.main.url(forResource: "audiotest", withExtension: "mp3")!)
             player.play()
         }
     }

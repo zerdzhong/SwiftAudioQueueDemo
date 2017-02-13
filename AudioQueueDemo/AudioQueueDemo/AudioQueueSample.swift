@@ -14,7 +14,7 @@ let kBufferByteSize: UInt32 = 2048
 
 class AudioQueueSample: NSObject {
     
-    var audioQueue: AudioQueueRef = nil
+    var audioQueue: AudioQueueRef? = nil
     
     var noteFrequency: Double = 0
     var noteAmplitude: Double = 0
@@ -40,24 +40,24 @@ class AudioQueueSample: NSObject {
         streamFormat.mReserved = 0;
         
         var status: OSStatus = 0
-        let selfPointer = unsafeBitCast(self, UnsafeMutablePointer<Void>.self)
-        status = AudioQueueNewOutput(&streamFormat, OutputCallback, selfPointer, CFRunLoopGetCurrent(), kCFRunLoopCommonModes, 0, &audioQueue)
+        let selfPointer = unsafeBitCast(self, to: UnsafeMutableRawPointer.self)
+        status = AudioQueueNewOutput(&streamFormat, OutputCallback as! AudioQueueOutputCallback, selfPointer, CFRunLoopGetCurrent(), CFRunLoopMode.commonModes.rawValue, 0, &audioQueue)
         
         assert(noErr == status)
         
-        var buffer: AudioQueueBufferRef = nil
+        var buffer: AudioQueueBufferRef? = nil
         for _ in 0..<3 {
-            status = AudioQueueAllocateBuffer(audioQueue, kBufferByteSize, &buffer)
+            status = AudioQueueAllocateBuffer(audioQueue!, kBufferByteSize, &buffer)
             assert(noErr == status)
             
-            generateTone(buffer)
+            generateTone(buffer!)
             
-            status = AudioQueueEnqueueBuffer(audioQueue, buffer, 0, nil)
+            status = AudioQueueEnqueueBuffer(audioQueue!, buffer!, 0, nil)
             
             assert(noErr == status)
         }
         
-        status = AudioQueueStart(audioQueue, nil)
+        status = AudioQueueStart(audioQueue!, nil)
         assert(noErr == status)
     }
     
@@ -71,14 +71,14 @@ class AudioQueueSample: NSObject {
         noteDecay = 1 / 44100.0;
     }
     
-    private func generateTone(buffer: AudioQueueBufferRef) {
+    fileprivate func generateTone(_ buffer: AudioQueueBufferRef) {
         if noteAmplitude == 0 {
-            memset(buffer.memory.mAudioData, 0, Int(buffer.memory.mAudioDataBytesCapacity))
+            memset(buffer.pointee.mAudioData, 0, Int(buffer.pointee.mAudioDataBytesCapacity))
         } else {
-            let count: Int = Int(buffer.memory.mAudioDataBytesCapacity) / sizeof(Float32)
+            let count: Int = Int(buffer.pointee.mAudioDataBytesCapacity) / MemoryLayout<Float32>.size
             var x: Double = 0
             var y: Double = 0
-            let audioData = UnsafeMutablePointer<Float32>(buffer.memory.mAudioData)
+            let audioData = unsafeBitCast(buffer.pointee.mAudioData, to: UnsafeMutablePointer<Float32>.self)
             
             for frame in 0..<count {
                 x = noteFrame * noteFrequency / kSampleRate
@@ -94,10 +94,10 @@ class AudioQueueSample: NSObject {
             }
         }
         
-        buffer.memory.mAudioDataByteSize = buffer.memory.mAudioDataBytesCapacity
+        buffer.pointee.mAudioDataByteSize = buffer.pointee.mAudioDataBytesCapacity
     }
     
-    private func processOutputBuffer(buffer: AudioQueueBufferRef, withAudioQueue: AudioQueueRef) -> Void {
+    fileprivate func processOutputBuffer(_ buffer: AudioQueueBufferRef, withAudioQueue: AudioQueueRef) -> Void {
         var status: OSStatus = 0
         
         generateTone(buffer)
@@ -108,8 +108,9 @@ class AudioQueueSample: NSObject {
     }
 }
 
-func OutputCallback(clientData: UnsafeMutablePointer<Void>, AQ: AudioQueueRef, buffer: AudioQueueBufferRef) {
-    let this = Unmanaged<AudioQueueSample>.fromOpaque(COpaquePointer(clientData)).takeUnretainedValue()
+func OutputCallback(_ clientData: UnsafeMutableRawPointer, AQ: AudioQueueRef, buffer: AudioQueueBufferRef) {
+
+    let this = Unmanaged<AudioQueueSample>.fromOpaque(clientData).takeUnretainedValue()
     
     this.processOutputBuffer(buffer, withAudioQueue: AQ)
 }
